@@ -1,4 +1,6 @@
 #include "chip.hpp"
+#include <algorithm>
+#include <cstring>
 #include <fstream>
 
 #include <iostream>
@@ -27,11 +29,24 @@ uint8_t fontset[FONTSET_SIZE] = {
     0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
-Chip8::Chip8()
-{
+Chip8::Chip8() {
+  // Set emulator vars
+  std::fill(this->registers, this->registers + 16, 0);
+  std::fill(this->memory, this->memory + 4096, 0);
+  this->index = 0;
+  this->pc = 0;
+  std::fill(this->stack, this->stack + 16, 0);
+  this->sp = 0;
+  this->delayTimer = 0;
+  this->soundTimer = 0;
+  std::fill(this->video, this->video + 2048, 0);
+  this->opcode = 0;
   this->pc = START_ADRESS;
+
+  // Set fonts on memory
   memcpy(&memory[FONTSET_START_ADDRESS], fontset, FONTSET_SIZE);
 
+  // Set random seed
   randByte = std::uniform_int_distribution<uint8_t>(0, 255u);
 }
 
@@ -39,12 +54,10 @@ Chip8::~Chip8() {}
 
 // Loads a ROM file into the ROM section of the memory
 // 0x200 ROM Address
-void Chip8::loadROM(char const *path)
-{
+void Chip8::loadROM(char const *path) {
   std::ifstream ROM(path, std::ios::binary | std::ios::ate);
 
-  if (ROM.is_open())
-  {
+  if (ROM.is_open()) {
 
     std::streamoff size = ROM.tellg();
     char *buffer = new char[size];
@@ -56,3 +69,24 @@ void Chip8::loadROM(char const *path)
     delete[] buffer;
   }
 }
+
+void Chip8::Tick() {
+  // Fetch instruction
+  this->opcode = (this->memory[pc]);
+  // inc PC
+  this->pc += 2;
+  // Decode
+  // TO-DO
+  // Decrement delay timer
+  if (this->delayTimer > 0) {
+    --this->delayTimer;
+  }
+
+  // Decrement sound timer
+  if (this->soundTimer > 0) {
+    --this->soundTimer;
+  }
+}
+
+// Chip instructions
+void Chip8::OP_00E0() { memset(this->video, 0, sizeof(this->video)); }

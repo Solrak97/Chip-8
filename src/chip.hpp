@@ -1,21 +1,20 @@
+#include <chrono>
 #include <cstdint>
 #include <random>
-#include <chrono>
 
-class Chip8
-{
+class Chip8 {
 public:
   // Emulation vars
-  uint8_t registers[16] = {};
-  uint8_t memory[4096] = {};
-  uint16_t index = 0;
-  uint16_t pc = 0;
-  uint16_t stack[16] = {};
-  uint8_t sp = 0;
-  uint8_t delayTimer = 0;
-  uint8_t soundTimer = 0;
-  uint32_t video[64 * 32] = {};
-  uint16_t opcode = 0;
+  uint8_t registers[16];
+  uint8_t memory[4096];
+  uint16_t index;
+  uint16_t pc;
+  uint16_t stack[16];
+  uint8_t sp;
+  uint8_t delayTimer;
+  uint8_t soundTimer;
+  uint32_t video[64 * 32];
+  uint16_t opcode;
 
   // Aux vars
   std::default_random_engine randGen;
@@ -47,8 +46,19 @@ public:
   void OP_Dxyn(); // DRW Vx, Vy, nibble
   void OP_Ex9E(); // SKP Vx
   void OP_ExA1(); // SKNP Vx
+  void OP_FX07(); // LD Vx, DT
+  void OP_FX0A(); // LD Vx, K
+  void OP_Fx15(); // LD DT, Vx
+  void OP_Fx18(); // LD ST, Vx
+  void OP_Fx1E(); // ADD I, Vx
+  void OP_Fx29(); // LD F, Vx
+  void OP_Fx33(); // LD B, Vx
+  void OP_Fx55(); // LD [I], Vx
+  void OP_Fx65(); // LD Vx, [I]
+  void OP_NOOP(); // NO OP
 
-
+  // code tick
+  void Tick();
 
   // Constructor / Destructor
 
