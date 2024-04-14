@@ -90,3 +90,141 @@ void Chip8::Tick() {
 
 // Chip instructions
 void Chip8::OP_00E0() { memset(this->video, 0, sizeof(this->video)); }
+
+void Chip8::OP_00EE() {
+  --this->sp;
+  this->pc = this->stack[sp];
+}
+
+void Chip8::OP_1nnn() {
+  uint16_t address = this->opcode & 0x0FFFu;
+  this->pc = address;
+}
+
+void Chip8::OP_2nnn() {
+  this->stack[sp++] = pc;
+  OP_1nnn();
+}
+
+void Chip8::OP_3xkk() {
+  uint8_t x = (this->opcode & 0x0F00) >> 8u;
+  uint8_t kk = (this->opcode & 0x0FF);
+
+  if (this->registers[x] == kk) {
+    this->pc += 2;
+  }
+}
+
+void Chip8::OP_4xkk() {
+  uint8_t x = (this->opcode & 0x0F00) >> 8u;
+  uint8_t kk = (this->opcode & 0x0FF);
+
+  if (this->registers[x] != kk) {
+    this->pc += 2;
+  }
+}
+
+void Chip8::OP_5xy0() {
+  uint8_t x = (this->opcode & 0x0F00) >> 8u;
+  uint8_t y = (this->opcode & 0x00F0) >> 4u;
+
+  if (this->registers[x] == this->registers[y]) {
+    this->pc += 2;
+  }
+}
+void Chip8::OP_6xkk() {
+  uint8_t x = (this->opcode & 0x0F00) >> 8u;
+  uint8_t kk = (this->opcode & 0x0FF);
+
+  this->registers[x] = kk;
+}
+
+void Chip8::OP_7xkk() {
+  uint8_t x = (this->opcode & 0x0F00) >> 8u;
+  uint8_t kk = (this->opcode & 0x0FF);
+  this->registers[x] += kk;
+}
+
+void Chip8::OP_8xy0() {
+  uint8_t x = (this->opcode & 0x0F00) >> 8u;
+  uint8_t y = (this->opcode & 0x00F0) >> 4u;
+
+  this->registers[x] = this->registers[y];
+}
+
+void Chip8::OP_8xy1() {
+  uint8_t x = (this->opcode & 0x0F00) >> 8u;
+  uint8_t y = (this->opcode & 0x00F0) >> 4u;
+
+  this->registers[x] |= this->registers[y];
+}
+
+void Chip8::OP_8xy2() {
+  uint8_t x = (this->opcode & 0x0F00) >> 8u;
+  uint8_t y = (this->opcode & 0x00F0) >> 4u;
+
+  this->registers[x] &= this->registers[y];
+}
+
+void Chip8::OP_8xy3() {
+  uint8_t x = (this->opcode & 0x0F00) >> 8u;
+  uint8_t y = (this->opcode & 0x00F0) >> 4u;
+
+  this->registers[x] ^= this->registers[y];
+}
+
+void Chip8::OP_8xy4() {
+  uint8_t x = (this->opcode & 0x0F00) >> 8u;
+  uint8_t y = (this->opcode & 0x00F0) >> 4u;
+
+  uint16_t sum = this->registers[x] + this->registers[y];
+  this->registers[0xF] = sum > 255u;
+  this->registers[x] = sum & 0xFFu;
+}
+
+void Chip8::OP_8xy5() {
+  uint8_t x = (this->opcode & 0x0F00) >> 8u;
+  uint8_t y = (this->opcode & 0x00F0) >> 4u;
+
+  this->registers[0xF] = this->registers[x] > this->registers[y];
+  this->registers[x] -= this->registers[y];
+}
+
+void Chip8::OP_8xy6() {
+  uint8_t x = (this->opcode & 0x0F00) >> 8u;
+
+  this->registers[0xF] = this->registers[x] & 0xF1u;
+  this->registers[x] >>= 1;
+}
+
+void Chip8::OP_8xy7() {
+  uint8_t x = (this->opcode & 0x0F00) >> 8u;
+  uint8_t y = (this->opcode & 0x00F0) >> 4u;
+
+  this->registers[0xF] = this->registers[y] > this->registers[x];
+  this->registers[x] = this->registers[y] - this->registers[x];
+}
+
+void Chip8::OP_8xyE() {
+  uint8_t x = (this->opcode & 0x0F00) >> 8u;
+  this->registers[0xF] = (this->registers[x] & 0x80u) >> 7u;
+  this->registers[x] <<= 1;
+}
+
+void Chip8::OP_9xy0() {} // SNE Vx, Vy
+void Chip8::OP_Annn() {} // LD I, addr
+void Chip8::OP_Bnnn() {} // JP V0, addr
+void Chip8::OP_Cxkk() {} // RND Vx, byte
+void Chip8::OP_Dxyn() {} // DRW Vx, Vy, nibble
+void Chip8::OP_Ex9E() {} // SKP Vx
+void Chip8::OP_ExA1() {} // SKNP Vx
+void Chip8::OP_FX07() {} // LD Vx, DT
+void Chip8::OP_FX0A() {} // LD Vx, K
+void Chip8::OP_Fx15() {} // LD DT, Vx
+void Chip8::OP_Fx18() {} // LD ST, Vx
+void Chip8::OP_Fx1E() {} // ADD I, Vx
+void Chip8::OP_Fx29() {} // LD F, Vx
+void Chip8::OP_Fx33() {} // LD B, Vx
+void Chip8::OP_Fx55() {} // LD [I], Vx
+void Chip8::OP_Fx65() {} // LD Vx, [I]
+void Chip8::OP_NOOP() {} // NO OP
